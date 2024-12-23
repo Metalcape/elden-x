@@ -13,6 +13,14 @@ namespace CS
 
 class ChrIns;
 
+struct FloatVector4
+{
+    float x;
+    float y;
+    float z;
+    float w;
+};
+
 struct SpecialEffectEntryAccumulatorInfo
 {
     void *unk0;
@@ -28,6 +36,7 @@ class SpecialEffect
 {
   public:
     virtual ~SpecialEffect() = default;
+    int Apply(unsigned int sp_effect_id, CS::ChrIns *target, CS::ChrIns *source, CS::FloatVector4 *unk0, unsigned char unk1, bool is_for_object, unsigned char unk2);
 
     struct sp_effect_entry;
     struct sp_effect_entry
