@@ -43,5 +43,7 @@ inline FunctionType *hook(const ScanArgs &args, FunctionType &detour, FunctionTy
 
 void* read(void *bytes, ptrdiff_t address, size_t length);
 void* write(const void *bytes, ptrdiff_t address, size_t length);
+template <typename FunctionType> void* read(void *bytes, FunctionType address, size_t length);
+template <typename FunctionType> void* write(const void *bytes, FunctionType address, size_t length);
 
 };

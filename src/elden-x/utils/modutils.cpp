@@ -144,3 +144,17 @@ void* modutils::write(const void *bytes, ptrdiff_t address, size_t length)
     auto offset = memory.data() + address;
     return memcpy(offset, bytes, length);
 }
+
+template <typename FunctionType>
+void* modutils::read(void *bytes, FunctionType address, size_t length)
+{
+    auto offset = memory.data() + reinterpret_cast<ptrdiff_t>(address);
+    return memcpy(bytes, offset, length);
+}
+
+template <typename FunctionType>
+void* modutils::write(const void *bytes, FunctionType address, size_t length)
+{
+    auto offset = memory.data() + reinterpret_cast<ptrdiff_t>(address);
+     return memcpy(offset, bytes, length);
+}
