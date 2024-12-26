@@ -52,10 +52,10 @@ inline void* read(void *bytes, FunctionType address, size_t length)
 }
 
 template <typename FunctionType>
-inline void* write(void *bytes, FunctionType address, size_t length)
+inline void* write(const void *bytes, FunctionType address, size_t length)
 {
     auto offset = memory.data() + reinterpret_cast<ptrdiff_t>(address);
-    return memcpy(bytes, offset, length);
+    return memcpy(offset, bytes, length);
 }
 
 }
