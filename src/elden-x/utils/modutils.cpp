@@ -16,7 +16,7 @@
 
 using namespace std;
 
-static span<unsigned char> memory;
+extern span<unsigned char> memory;
 
 static string sus_filenames[] = {
     "ALI213.ini",      "ColdAPI.ini",   "ColdClientLoader.ini",  "CPY.ini",

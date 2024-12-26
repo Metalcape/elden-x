@@ -1,8 +1,11 @@
 #pragma once
 #define WIN32_LEAN_AND_MEAN
 
+#include <span>
 #include <stdexcept>
 #include <vector>
+
+static std::span<unsigned char> memory;
 
 namespace modutils
 {
@@ -53,4 +56,6 @@ inline void* write(void *bytes, FunctionType address, size_t length)
 {
     auto offset = memory.data() + reinterpret_cast<ptrdiff_t>(address);
     return memcpy(bytes, offset, length);
+}
+
 }
