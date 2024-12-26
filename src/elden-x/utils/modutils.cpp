@@ -132,3 +132,15 @@ void modutils::enable_hooks()
         throw runtime_error(string("Error enabling hooks: ") + MH_StatusToString(mh_status));
     }
 }
+
+void* modutils::read(void *bytes, ptrdiff_t address, size_t length)
+{
+    auto offset = memory.data() + address;
+    return memcpy(bytes, offset, length);
+}
+
+void* modutils::write(const void *bytes, ptrdiff_t address, size_t length)
+{
+    auto offset = memory.data() + address;
+    return memcpy(offset, bytes, length);
+}

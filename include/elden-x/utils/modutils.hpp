@@ -41,4 +41,7 @@ inline FunctionType *hook(const ScanArgs &args, FunctionType &detour, FunctionTy
     return function;
 }
 
+void* read(void *bytes, ptrdiff_t address, size_t length);
+void* write(const void *bytes, ptrdiff_t address, size_t length);
+
 };
