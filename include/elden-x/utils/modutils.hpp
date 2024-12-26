@@ -41,9 +41,16 @@ inline FunctionType *hook(const ScanArgs &args, FunctionType &detour, FunctionTy
     return function;
 }
 
-void* read(void *bytes, ptrdiff_t address, size_t length);
-void* write(const void *bytes, ptrdiff_t address, size_t length);
-template <typename FunctionType> void* read(void *bytes, FunctionType address, size_t length);
-template <typename FunctionType> void* write(const void *bytes, FunctionType address, size_t length);
+template <typename FunctionType>
+inline void* read(void *bytes, FunctionType address, size_t length)
+{
+    auto offset = memory.data() + reinterpret_cast<ptrdiff_t>(address);
+    return memcpy(bytes, offset, length);
+}
 
-};
+template <typename FunctionType>
+inline void* write(void *bytes, FunctionType address, size_t length)
+{
+    auto offset = memory.data() + reinterpret_cast<ptrdiff_t>(address);
+    return memcpy(bytes, offset, length);
+}
