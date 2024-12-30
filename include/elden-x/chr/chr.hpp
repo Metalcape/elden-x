@@ -8,6 +8,14 @@
 namespace from
 {
 
+namespace FD4
+{
+    class FD4ComponentBase
+    {
+        public: virtual ~FD4ComponentBase() = default;
+    };
+}
+
 namespace CS
 {
 
@@ -164,6 +172,19 @@ class CSChrVfxModule
     int unk4c;
 };
 
+class CSChrModuleBase : FD4::FD4ComponentBase
+{
+    ChrIns *owning_chr;
+};
+
+class CSChrPhysicsModule : CSChrModuleBase
+{
+    public:
+        unsigned char unk10[0x60];
+        FloatVector4 position;
+        unsigned char unk80[0x3A0];
+};
+
 class ChrIns
 {
   public:
@@ -171,7 +192,9 @@ class ChrIns
 
     struct modules_type
     {
-        void *unk0[23];
+        void *unk0[13];
+        CS::CSChrPhysicsModule *physics_module;
+        void *unk70[9];
         CS::CSChrVfxModule *vfx_module;
         void *unkc0[2];
         CS::CSChrModelParamModifierModule *model_param_modifier_module;
@@ -182,6 +205,37 @@ class ChrIns
     unsigned char unk180[0x10];
     modules_type *modules;
     unsigned char unk198[0x3e8];
+};
+
+class DebugCam
+{
+    public:
+        virtual ~DebugCam() = default;
+
+        unsigned char unk8[0x38];
+        FloatVector4 camera_pos;
+        unsigned char unk50[0x80];
+};
+
+class GameRend
+{
+    public:
+        virtual ~GameRend() = default;
+
+        unsigned char unk8[0xC0];
+        uint32_t is_debug_cam_active;
+        DebugCam *debug_cam;
+        unsigned char unkD8[0x28];
+};
+
+class FieldArea
+{
+    public:
+        virtual ~FieldArea() = default;
+
+        unsigned char unk8[0x18];
+        GameRend *game_rend;
+        unsigned char unk28[0x668];
 };
 
 }
