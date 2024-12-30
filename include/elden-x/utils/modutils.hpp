@@ -1,5 +1,7 @@
 #pragma once
 #define WIN32_LEAN_AND_MEAN
+#include <windows.h>
+#include <winver.h>
 
 #include <span>
 #include <stdexcept>
@@ -44,18 +46,21 @@ inline FunctionType *hook(const ScanArgs &args, FunctionType &detour, FunctionTy
     return function;
 }
 
+bool ReadMemoryWithThreadControl(LPVOID address, SIZE_T size, std::vector<BYTE>& buffer);
+bool WriteMemoryWithThreadControl(LPVOID address, SIZE_T size, const unsigned char *data);
+
 template <typename FunctionType>
-inline void* read(void *bytes, FunctionType address, size_t length)
+inline void read(std::vector<unsigned char> &bytes, FunctionType address, size_t length)
 {
-    auto offset = memory.data() + reinterpret_cast<ptrdiff_t>(address);
-    return memcpy(bytes, offset, length);
+    auto offset = reinterpret_cast<LPVOID>(address);
+    ReadMemoryWithThreadControl(offset, length, bytes);
 }
 
 template <typename FunctionType>
-inline void* write(const void *bytes, FunctionType address, size_t length)
+inline void write(const unsigned char *bytes, FunctionType address, size_t length)
 {
-    auto offset = memory.data() + reinterpret_cast<ptrdiff_t>(address);
-    return memcpy(offset, bytes, length);
+    auto offset = reinterpret_cast<LPVOID>(address);
+    WriteMemoryWithThreadControl(offset, length, bytes);
 }
 
 }

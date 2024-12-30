@@ -11,6 +11,7 @@
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 #include <winver.h>
+#include <TlHelp32.h>
 
 #include "elden-x/utils/modutils.hpp"
 
@@ -131,4 +132,110 @@ void modutils::enable_hooks()
     {
         throw runtime_error(string("Error enabling hooks: ") + MH_StatusToString(mh_status));
     }
+}
+
+//-----------------------------------------------------------------------------
+static std::vector<HANDLE> PauseAllThreads()
+{
+    // Get a snapshot of all threads in the process
+    HANDLE hSnapshot = CreateToolhelp32Snapshot(TH32CS_SNAPTHREAD, 0);
+    if (hSnapshot == INVALID_HANDLE_VALUE) 
+    {
+        throw runtime_error(string("Failed to create thread snapshot."));
+    }
+
+    // Pause all threads in the current process except the calling thread
+    DWORD currentThreadId = GetCurrentThreadId();
+    THREADENTRY32 threadEntry;
+    threadEntry.dwSize = sizeof(THREADENTRY32);
+
+    std::vector<HANDLE> pausedThreads;
+    if (Thread32First(hSnapshot, &threadEntry)) {
+        do {
+            if (threadEntry.th32OwnerProcessID == GetCurrentProcessId() && threadEntry.th32ThreadID != currentThreadId) 
+            {
+                HANDLE hThread = OpenThread(THREAD_SUSPEND_RESUME, FALSE, threadEntry.th32ThreadID);
+                if (hThread) 
+                {
+                    SuspendThread(hThread);
+                    pausedThreads.push_back(hThread);
+                }
+            }
+        } while (Thread32Next(hSnapshot, &threadEntry));
+    }
+
+    CloseHandle(hSnapshot);
+    return pausedThreads;
+}
+
+static void ResumeAllThreads(std::vector<HANDLE> pausedThreads)
+{
+    for (HANDLE hThread : pausedThreads) 
+    {
+        ResumeThread(hThread);
+        CloseHandle(hThread);
+    }
+}
+
+bool modutils::ReadMemoryWithThreadControl(LPVOID address, SIZE_T size, std::vector<BYTE>& buffer) 
+{
+    buffer.resize(size);
+    std::vector<HANDLE> pausedThreads = PauseAllThreads();
+
+    // Adjust memory protection to allow reading
+    DWORD oldProtect;
+    if (!VirtualProtect(address, size, PAGE_EXECUTE_READWRITE, &oldProtect)) 
+    {
+        SPDLOG_ERROR("Failed to change memory protection.");
+        ResumeAllThreads(pausedThreads);
+        return false;
+    }
+
+    // Read memory
+    SIZE_T bytesRead;
+    if (!ReadProcessMemory(GetCurrentProcess(), address, buffer.data(), size, &bytesRead) || bytesRead != size) 
+    {
+        SPDLOG_ERROR("Failed to read memory.");
+        VirtualProtect(address, size, oldProtect, &oldProtect);
+        ResumeAllThreads(pausedThreads);
+        return false;
+    }
+
+    // Restore original memory protection
+    VirtualProtect(address, size, oldProtect, &oldProtect);
+    ResumeAllThreads(pausedThreads);
+
+    return true;
+}
+
+//-----------------------------------------------------------------------------
+bool modutils::WriteMemoryWithThreadControl(LPVOID address, SIZE_T size, const unsigned char *data) 
+{
+    std::vector<HANDLE> pausedThreads = PauseAllThreads();
+
+    // Adjust memory protection to allow writing
+    DWORD oldProtect;
+    if (!VirtualProtect(address, size, PAGE_EXECUTE_READWRITE, &oldProtect)) 
+    {
+        SPDLOG_ERROR("Failed to change memory protection.");
+        ResumeAllThreads(pausedThreads);
+        return false;
+    }
+
+    // Write memory
+    SIZE_T bytesWritten;
+    if (!WriteProcessMemory(GetCurrentProcess(), address, data, size, &bytesWritten) || bytesWritten != size) 
+    {
+        SPDLOG_ERROR("Failed to write memory.");
+        VirtualProtect(address, size, oldProtect, &oldProtect);
+        ResumeAllThreads(pausedThreads);
+        return false;
+    }
+
+    // Restore original memory protection
+    VirtualProtect(address, size, oldProtect, &oldProtect);
+    FlushInstructionCache(GetCurrentProcess(), address, size);
+    ResumeAllThreads(pausedThreads);
+
+    return true;
 }
