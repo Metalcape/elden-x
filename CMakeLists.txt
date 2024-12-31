@@ -41,6 +41,7 @@ add_library(elden-x STATIC
   src/elden-x/menu/menu_man.cpp
   src/elden-x/messages.cpp
   src/elden-x/session.cpp
+  src/elden-x/gameman.cpp
   src/elden-x/utils/modutils.cpp
   src/elden-x/params/params.cpp)
 
