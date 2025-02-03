@@ -81,7 +81,7 @@ static_assert(0x18 == __builtin_offsetof(SpecialEffect, unk18));
 static_assert(0x20 == __builtin_offsetof(SpecialEffect, unk20));
 static_assert(0x138 == sizeof(SpecialEffect));
 
-class CSChrModuleBase
+class CSChrModuleBase : FD4::FD4ComponentBase
 {
   public:
     virtual ~CSChrModuleBase() = default;
@@ -220,11 +220,6 @@ class CSChrVfxModule : public CSChrModuleBase
     int unk44;
     int unk48;
     int unk4c;
-};
-
-class CSChrModuleBase : FD4::FD4ComponentBase
-{
-    ChrIns *owning_chr;
 };
 
 class CSChrPhysicsModule : CSChrModuleBase

@@ -1,5 +1,7 @@
 #pragma once
 
+#include <cstdint>
+
 namespace er
 {
 namespace CS
