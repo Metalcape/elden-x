@@ -36,14 +36,15 @@ add_library(pattern16 INTERFACE)
 target_include_directories(pattern16 INTERFACE ${pattern16_SOURCE_DIR}/include)
 
 add_library(elden-x STATIC
-  src/elden-x/chr/world_chr_man.cpp
+  src/elden-x/messages.cpp
   src/elden-x/gamedata/game_data_man.cpp
   src/elden-x/menu/menu_man.cpp
   src/elden-x/messages.cpp
   src/elden-x/session.cpp
-  src/elden-x/gameman.cpp
+  src/elden-x/game_man.cpp
   src/elden-x/utils/modutils.cpp
-  src/elden-x/params/params.cpp)
+  src/elden-x/params/params.cpp
+  src/elden-x/singletons.cpp)
 
 set_target_properties(elden-x PROPERTIES LINKER_LANGUAGE CXX)
 target_include_directories(elden-x PUBLIC include)

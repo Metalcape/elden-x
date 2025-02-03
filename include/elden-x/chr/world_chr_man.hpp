@@ -1,30 +1,35 @@
 #pragma once
 
+#include "chrset.hpp"
 #include "player.hpp"
 
-namespace from
+#include "../singletons.hpp"
+
+namespace er
 {
 namespace CS
 {
 
-class WorldChrManImp
+class WorldChrManImp : public FD4::FD4Singleton<WorldChrManImp, FD4::singleton_index::WorldChrMan>
 {
   public:
-    static WorldChrManImp *instance();
-
-    struct net_player_type
-    {
-        CS::PlayerIns *player;
-        unsigned char unk[0x8];
-    };
-
     virtual ~WorldChrManImp() = default;
 
-    unsigned char unk8[0x10EF0];
-    net_player_type *net_players;
-    unsigned char unk10F00[0xd608];
+    unsigned char unk8[0x10ed8];
+    CS::ChrSet<PlayerIns> player_chr_set;
+    CS::ChrSet<PlayerIns> ghost_chr_set;
+    CS::ChrSet<ChrIns> spirit_ash_chr_set;
+    CS::ChrSet<ChrIns> debug_chr_set;
+    unsigned char unk11040[0xd4c8];
     CS::PlayerIns *main_player;
+    unsigned char unk1e510[0xed0];
 };
 
+static_assert(0x10ee0 == __builtin_offsetof(WorldChrManImp, player_chr_set));
+static_assert(0x10f38 == __builtin_offsetof(WorldChrManImp, ghost_chr_set));
+static_assert(0x10f90 == __builtin_offsetof(WorldChrManImp, spirit_ash_chr_set));
+static_assert(0x10fe8 == __builtin_offsetof(WorldChrManImp, debug_chr_set));
+static_assert(0x1e508 == __builtin_offsetof(WorldChrManImp, main_player));
+static_assert(0x1f3e0 == sizeof(WorldChrManImp));
 }
 }

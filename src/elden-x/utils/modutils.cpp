@@ -1,3 +1,4 @@
+#include <array>
 #include <codecvt>
 #include <filesystem>
 #include <locale>
@@ -78,40 +79,47 @@ void modutils::deinitialize()
     MH_Uninitialize();
 }
 
-void *modutils::scan(const ScanArgs &args)
+uintptr_t modutils::impl::scan_memory(uintptr_t address, const std::string &aob)
 {
-    unsigned char *match;
-    if (args.address != nullptr)
+    if (!address)
     {
-        match = reinterpret_cast<unsigned char *>(args.address);
-    }
-    else if (!args.aob.empty())
-    {
-        match = reinterpret_cast<unsigned char *>(
-            Pattern16::scan(&memory.front(), memory.size(), args.aob));
-    }
-    else
-    {
-        match = &memory.front();
+        address = (uintptr_t)memory.data();
     }
 
-    if (match != nullptr)
+    if (!aob.empty())
     {
-        match += args.offset;
-
-        for (auto [first, second] : args.relative_offsets)
-        {
-            ptrdiff_t offset = *reinterpret_cast<const int *>(&match[first]) + second;
-            match += offset;
-        }
-
-        return match;
+        ptrdiff_t size = (uintptr_t)&memory.back() - address;
+        address = (uintptr_t)Pattern16::scan((void *)address, size, aob);
     }
 
-    return nullptr;
+    return address;
 }
 
-void modutils::hook(void *function, void *detour, void **trampoline)
+uintptr_t modutils::impl::apply_offsets(
+    uintptr_t address, ptrdiff_t offset,
+    const modutils::scanopts::relative_offsets_type &relative_offsets)
+{
+    if (address)
+    {
+        address += offset;
+
+        for (auto [first, second] : relative_offsets)
+        {
+            ptrdiff_t offset = *reinterpret_cast<int *>(address + first) + second;
+            address += offset;
+        }
+    }
+
+    return address;
+}
+
+uintptr_t modutils::impl::scan(const scanopts &opts)
+{
+    auto result = scan_memory((uintptr_t)opts.address, opts.aob);
+    return apply_offsets(result, opts.offset, opts.relative_offsets);
+}
+
+void modutils::impl::hook(void *function, void *detour, void **trampoline)
 {
     auto mh_status = MH_CreateHook(function, detour, trampoline);
     if (mh_status != MH_OK)

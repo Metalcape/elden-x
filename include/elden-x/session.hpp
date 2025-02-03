@@ -2,16 +2,17 @@
 
 #include <span>
 
-namespace from
+#include "singletons.hpp"
+
+namespace er
 {
 namespace CS
 {
 
 class CSSessionManagerImp
+    : public FD4::FD4Singleton<CSSessionManagerImp, FD4::singleton_index::CSSessionManager>
 {
   public:
-    static CSSessionManagerImp *instance();
-
     struct player_entry
     {
         void *unk0;

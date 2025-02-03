@@ -2,7 +2,9 @@
 
 #include "param_file.hpp"
 
-namespace from
+#include "../singletons.hpp"
+
+namespace er
 {
 
 namespace FD4
@@ -37,13 +39,14 @@ class ParamResCap : public FD4::FD4ResCap
     FD4::FD4ParamResCap *fd4_param_res_cap;
 };
 
-class SoloParamRepository : public FD4::FD4ResCap
+class SoloParamRepository
+    : public FD4::FD4ResCap,
+      public FD4::FD4Singleton<SoloParamRepository, FD4::singleton_index::SoloParamRepository>
 {
   public:
     static bool are_params_ready();
-    static void wait_for_params();
 
-    static SoloParamRepository *instance();
+    static void wait_for_params();
 
     virtual ~SoloParamRepository() = default;
 
